@@ -20,7 +20,8 @@ typedef struct {
     u_int_t       next_tlb_ptr;  /* next candidate entry to be replaced/used */
 }tlb_t;
 
-int TLB_init(tlb_t* tlb);
-int TLB_replacement_FIFO(page_t page_num, frame_t frame_num, tlb_t* tlb);
-int TLB_display(tlb_t tlb);
+int tlb_init(tlb_t* tlb);
+int tlb_replacement_FIFO(page_t page_num, frame_t frame_num, tlb_t* tlb);
+int tlb_display(tlb_t tlb);
+int search_tlb(page_t page_num, tlb_t tlb, bool* is_tlb_hit, frame_t* frame_num); //NOT IMPLEMENTED
 #endif
