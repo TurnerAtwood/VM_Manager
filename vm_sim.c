@@ -7,9 +7,17 @@
 #include "physical_memory.h"
 #define DEBUG
 
-logic_address_loader(char* logic_address_file_name, laddress_t* logic_address_list); //NOPE
+// This is how many logic addresses are requested
+typedef laddress_t logic_address_list_t[PAGE_SIZE*NUM_PAGES]; //SIZE INCORRECT (needs to be dynamic)
+typedef value_t address_value_list_t[PAGE_SIZE*NUM_PAGES]; //SIZE INCORRECT (see above)
+int logic_address_loader(char* logic_address_file_name, logic_address_list_t logic_address_list); //NOPE
+int get_a_logic_address(logic_address_list_t logic_address_list, laddress_t* logic_address); //NOPE
+int update_address_value_list(laddress_t logic_address, paddress_t physical_address,
+                                value_t value, address_value_list_t* address_value_list); //NOPE
+int output_address_value_list(char* output_file, address_value_list_t address_value_list); //NOPE
 
-int main () { /* Variables: page number, frame number and offset */
+int main () { 
+    /* Variables: page number, frame number and offset */
     page_t page_num;
     frame_t frame_num;
     offset_t offset;
@@ -41,14 +49,16 @@ int main () { /* Variables: page number, frame number and offset */
     tlb_init(&sys_tlb);
     page_table_init(&page_table);
 
-    
+    /* Lists for I/O */
+    logic_address_list_t logic_address_list;
+    unsigned int logic_address_list_size;
 
     /* Create a logical address list from the file */ 
-    logic_address_loader(input_file, logic_address_list);
+    logic_address_loader(input_file, logic_address_list); //INCLUDE SIZE
 
-    for (each logical address in logic_address_list) {    
+    for (int i = 0; i < logic_address_list_size; i++) {    
     /* Get a logic address, its page number and offset */    
-    get_a_logic_address(logic_address_list, logic_address);    
+    get_a_logic_address(logic_address_list, &logic_address);    
     /*      
      * The code below demonstrates how to use a pointer to access      
      * page_number updated by the get_page_number() function      
@@ -94,10 +104,11 @@ int main () { /* Variables: page number, frame number and offset */
     } 
     /* end of else TLB Miss */   
     /* Read one-byte value from the physical memory */    
-    read_physical_memory(physical_address, &value);    
+    read_physical_memory(physical_address, physical_memory, &value);    
     /* Update the address-value list */ 
-    update_address_value_list(logic_address, physical_address, value                             
-                                &address_value_list)} 
+    update_address_value_list(logic_address, physical_address, value,                             
+                                &address_value_list);
+    } 
     /* end of for logic_address_list */
     /* Output the address-value list into an output file */
     output_address_value_list(output_file, address_value_list);

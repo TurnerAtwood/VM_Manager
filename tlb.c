@@ -40,9 +40,27 @@ int tlb_display(tlb_t tlb) {
         printf("TLB entry %d, page num: %d, frame num: %d, ", i, tlb.tlb_entry[i].page_num, tlb.tlb_entry[i].frame_num);
         if (tlb.tlb_entry[i].valid == FALSE) 
             printf("Invalid\n");
-        else printf("Valide\n");
+        else printf("Valid\n");
     }
 
     return 0;
 }
+
+int search_tlb(page_t page_num, tlb_t tlb, bool* is_tlb_hit, frame_t* frame_num) {
+    u_int_t i;
+    bool found = FALSE;
+    /* check for page_num in every tlb_entry */
+    for (i = 0; i < TLB_SIZE; i++) { 
+        printf("TLB entry %d, page num: %d, frame num: %d, ", i, tlb.tlb_entry[i].page_num, tlb.tlb_entry[i].frame_num);
+        tlb_entry_t tlb_entry = tlb.tlb_entry[i];
+        if (tlb_entry.page_num == page_num && tlb_entry.valid == FALSE) {
+            found = TRUE;
+            *frame_num = tlb_entry.frame_num;
+        }
+    }
+
+    *is_tlb_hit = found;
+    return 0;
+}
+
 

@@ -31,7 +31,7 @@ int main ( int argc, char *argv[] ) {
     byte_t one_byte; 
     
     seek_position= 4;
-    num_bytes_read = 4;    // DON'T HARD CODE (4 bytes per index)
+    num_bytes_read = PAGE_SIZE;    // ??? DON'T HARD CODE (4 bytes per index)
 
     /* argc should be 2 for correct execution */
     if (argc != 2) {
