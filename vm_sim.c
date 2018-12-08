@@ -48,13 +48,22 @@ int main () {
     /* Initialize the system */
     tlb_init(&sys_tlb);
     page_table_init(&page_table);
+    init_physical_memory(physical_memory);
 
     /* Lists for I/O */
     logic_address_list_t logic_address_list;
-    unsigned int logic_address_list_size;
+    int logic_address_list_size = 0;
 
     /* Create a logical address list from the file */ 
     logic_address_loader(input_file, logic_address_list); //INCLUDE SIZE
+
+    // TEST MEM ACCESS
+    value_t val = 100;
+    physical_address = 0x0007;
+    frame_num= 0;
+    load_frame_to_physical_memory(frame_num, physical_memory);
+    read_physical_memory(physical_address, physical_memory, &val);
+    printf("%d\n",val);
 
     for (int i = 0; i < logic_address_list_size; i++) {    
     /* Get a logic address, its page number and offset */    
@@ -87,17 +96,8 @@ int main () {
     }        
     /* page fault occurs: call fault_fault_handler */        
     else {            
-        /* 
-         * Handling a page fault: Load a 256-byte page from backing_store             
-         * into the simulated main memory.             
-         * Attention: You need to call the page_table_update() and              
-         * TLB_replacement_LRU() functions to implement the following              
-         * page_fault_handler() function, where both page_table and              
-         * sys_tlb must be updated.              
-         * The prototype has been changed by adding frame_number as              
-         * an input parameter.              
-        */            
-        page_fault_handler(page_num, &physical_memory,                                
+                    
+        page_fault_handler(frame_num, &physical_memory,                                
                             &page_table, &sys_tlb);            
         create_physical_address(frame_num, offset, &physical_address);        
         }    
@@ -116,3 +116,16 @@ int main () {
 
 
 // THESE ARE FUNCTIONS DEALING WITH INPUT/OUTPUT
+int logic_address_loader(char* logic_address_file_name, logic_address_list_t logic_address_list) {
+    return 0;
+}
+int get_a_logic_address(logic_address_list_t logic_address_list, laddress_t* logic_address) {
+    return 0;
+}
+int update_address_value_list(laddress_t logic_address, paddress_t physical_address,
+                                value_t value, address_value_list_t* address_value_list) {
+    return 0;
+}
+int output_address_value_list(char* output_file, address_value_list_t address_value_list) {
+    return 0;
+}

@@ -16,7 +16,7 @@
 
 #define PAGE_OFFSET_MASK 0xFF /* mask to extract the offset from a logical address */
 
-const char backing_store[] = "BACKING_STORE";	/* a simulated hard disk */
+static const char backing_store[] = "BACKING_STORE";	/* a simulated hard disk */
 
 typedef enum{FALSE, TRUE} bool;
 typedef unsigned int u_int_t;

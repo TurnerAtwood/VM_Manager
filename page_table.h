@@ -10,16 +10,16 @@ typedef struct {
     page_t  page_num;
     frame_t frame_num;
     bool    valid;      /* indicate if this entry is valid */
-}page_table_entry_t;
+} page_table_entry_t;
 
 typedef struct {
-    page_table_entry_t page_table_entry[NUM_PAGES]; 
-    u_int_t       next_page_table_ptr;  /* next candidate entry to be replaced/used */
-}page_table_t;
+    page_table_entry_t page_table_entry[NUM_PAGES];
+    u_int_t       next_page_table_ptr;  /* next candidate entry to be replaced/used */ 
+} page_table_t;
 
-int page_table_init(page_table_t* page_table); //NOPE
+int page_table_init(page_table_t* page_table);
 int search_page_table(page_t page_num, page_table_t page_table, 
-						bool* is_page_fault, frame_t* frame_num); //NOPE
-int page_fault_handler(page_t page_num, physical_memory_t* physical_memory, 
-						page_table_t* page_table, tlb_t* tlb); //NOPE
+						bool* is_page_fault, frame_t* frame_num);
+int page_fault_handler(frame_t frame_num, physical_memory_t* physical_memory, 
+						page_table_t* page_table, tlb_t* tlb); //NOPE (LAST)
 #endif

@@ -30,7 +30,7 @@ typedef unsigned int paddress_t;
 char *itob(int x);
 char *itob16(int x);
 char *itob8(int x);
-int create_physical_address(frame_t frame_num, offset_t offset, paddress_t* physical_address); //NOPE
-int get_offset(laddress_t logic_address, offset_t* offset); //NOPE
-int get_page_number(laddress_t logic_address, page_t* page_num); //NOPE
+int get_offset(laddress_t logic_address, offset_t* offset);
+int get_page_number(laddress_t logic_address, page_t* page_num);
+int create_physical_address(frame_t frame_num, offset_t offset, paddress_t* physical_address);
 #endif

@@ -13,7 +13,7 @@
 #include <limits.h>
 #include "address.h"
 //#define DEBUG
-
+/*
 int main ( int argc, char *argv[] ) {
     laddress_t logical_address;
     page_t     page_num;
@@ -24,7 +24,8 @@ int main ( int argc, char *argv[] ) {
     logical_address = 16916;
 
     page_num = logical_address >> OFFSET_BITS;
-    offset = logical_address & OFFSET_MASK;   
+    offset = logical_address & OFFSET_MASK;  
+    get_offset(logical_address, &offset); 
 
     printf("logical address: %d, page number: %d, offset: %d\n", logical_address, page_num, offset);
   
@@ -46,6 +47,7 @@ int main ( int argc, char *argv[] ) {
 
     return 0;
 }
+*/
 
 /*
  * convert machine number to human-readable binary string.
@@ -112,4 +114,20 @@ char *itob8(int x)
         j--;
     } 
     return buff;
+}
+
+
+int get_offset(laddress_t logic_address, offset_t* offset) {
+    *offset = logic_address & OFFSET_MASK;
+    return 0;
+}
+
+int get_page_number(laddress_t logic_address, page_t* page_num) {
+    *page_num = logic_address >> OFFSET_BITS;
+    return 0;
+}
+
+int create_physical_address(frame_t frame_num, offset_t offset, paddress_t* physical_address) {
+    *physical_address = frame_num << OFFSET_BITS | offset;
+    return 0;
 }
