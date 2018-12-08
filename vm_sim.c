@@ -6,7 +6,6 @@
 #include "address.h"
 #include "page_table.h"
 #include "physical_memory.h"
-#define DEBUG
 
 // This is how many logic addresses are requested
 typedef laddress_t logic_address_list_t[PAGE_SIZE*NUM_PAGES]; //SIZE INCORRECT (needs to be dynamic)
@@ -44,7 +43,8 @@ int main () {
     bool is_page_fault;
 
     /* Input and output file names */
-    const char input_file[] = "testinput.txt";
+    //const char input_file[] = "testinput.txt";
+    const char input_file[] = "InputFile.txt";
     const char output_file[] = "output.txt";
 
     /* Initialize the system */
@@ -58,16 +58,6 @@ int main () {
 
     /* Create a logical address list from the file */ 
     logic_address_loader(input_file, logic_address_list, &logic_address_list_size); //INCLUDE SIZE
-
-    // TEST MEM ACCESS
-    /*
-    value_t val = 100;
-    physical_address = 0xff07;
-    frame_num= 0xff;
-    load_frame_to_physical_memory(frame_num, physical_memory);
-    read_physical_memory(physical_address, physical_memory, &val);
-    printf("%d\n",val);
-    */
 
     for (int i = 0; i < logic_address_list_size; i++) {    
         /* Get a logic address, its page number and offset */    
@@ -85,7 +75,8 @@ int main () {
         search_tlb(page_num, sys_tlb, &is_tlb_hit, &frame_num);  
 
         /* Hit the TLB: the address translation is done. */    
-        if (is_tlb_hit == TRUE) {        
+        if (is_tlb_hit == TRUE) {  
+            printf("-----TLB HIT-----\n");
             create_physical_address(frame_num, offset, &physical_address);    
         }    
 
@@ -98,7 +89,7 @@ int main () {
                 create_physical_address(frame_num, offset, &physical_address);
 
                 /* Replace the oldest entry in the TLB with this new entry */            
-                tlb_replacement_FIFO(page_num, frame_num, &sys_tlb);     //CHANGE TO LRU   
+                tlb_replacement_LRU(page_num, frame_num, &sys_tlb);     //CHANGE TO LRU   
             }        
             /* page fault occurs: call fault_fault_handler */        
             else {             
@@ -107,11 +98,14 @@ int main () {
                 create_physical_address(frame_num, offset, &physical_address);        
             }    
         } 
-        /* end of else TLB Miss */   
+        /* end of else TLB Miss */ 
+        // Update the tlb
+        tlb_update(page_num, &sys_tlb);  
         /* Read one-byte value from the physical memory */    
         read_physical_memory(physical_address, physical_memory, &value);    \
         printf("frame: %d\n", frame_num);
         printf("value: %d\n", value);
+        tlb_display(sys_tlb);
         /* Update the address-value list */ 
         update_address_value_list(logic_address, physical_address, value,                             
                                     i, address_value_list);
@@ -168,6 +162,7 @@ int update_address_value_list(laddress_t logic_address, paddress_t physical_addr
     address_value_list[index] = value;
     return 0;
 }
+
 int output_address_value_list(char* output_file_name, address_value_list_t address_value_list, 
                                 int list_size) {
     FILE *file;

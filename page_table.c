@@ -5,7 +5,6 @@
 #include "page_table.h"
 #include "tlb.h"
 #include "physical_memory.h"
-//#define DEBUG
 
 int page_table_init(page_table_t* page_table) {
 	for (int i = 0; i < NUM_PAGES; i++) {
@@ -67,5 +66,6 @@ int page_fault_handler(page_t page_num, frame_t* frame_num, physical_memory_t* p
 	load_frame_to_physical_memory(page_num, *frame_num, *physical_memory);
 
 	//Update the tlb
+	tlb_replacement_LRU(page_num, *frame_num, tlb);
 	return 0;
 }

@@ -13,6 +13,7 @@ typedef struct {
     page_t  page_num;
     frame_t frame_num;
     bool    valid;      /* indicate if this entry is valid */
+    int age;
 }tlb_entry_t;
 
 typedef struct {
@@ -21,7 +22,8 @@ typedef struct {
 }tlb_t;
 
 int tlb_init(tlb_t* tlb);
-int tlb_replacement_FIFO(page_t page_num, frame_t frame_num, tlb_t* tlb); //NEED  LRU
+int tlb_replacement_LRU(page_t page_num, frame_t frame_num, tlb_t* tlb); //NEED  LRU
 int tlb_display(tlb_t tlb);
+int tlb_update(page_t page_num, tlb_t* tlb);
 int search_tlb(page_t page_num, tlb_t tlb, bool* is_tlb_hit, frame_t* frame_num);
 #endif
