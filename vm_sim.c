@@ -80,7 +80,7 @@ int main () {
         get_page_number(logic_address, &page_num);     
         get_offset(logic_address, &offset);    
 
-        printf("page %d, offset %d\n", page_num, offset);
+        //printf("page %d, offset %d\n", page_num, offset);
         /* Search the TLB */    
         search_tlb(page_num, sys_tlb, &is_tlb_hit, &frame_num);  
 
@@ -102,7 +102,7 @@ int main () {
             }        
             /* page fault occurs: call fault_fault_handler */        
             else {             
-                page_fault_handler(page_num, &physical_memory,                                
+                page_fault_handler(page_num, &frame_num, &physical_memory,                                
                                     &page_table, &sys_tlb);            
                 create_physical_address(frame_num, offset, &physical_address);        
             }    
@@ -110,7 +110,7 @@ int main () {
         /* end of else TLB Miss */   
         /* Read one-byte value from the physical memory */    
         read_physical_memory(physical_address, physical_memory, &value);    \
-
+        printf("frame: %d\n", frame_num);
         printf("value: %d\n", value);
         /* Update the address-value list */ 
         update_address_value_list(logic_address, physical_address, value,                             

@@ -32,14 +32,15 @@ int search_page_table(page_t page_num, page_table_t page_table,
 }
 
 // Inserts a new pte into page_table and increments the p_t pointer
-int insert_page_table(page_t page_num, frame_t frame_num, page_table_t* page_table) {
-	// New pte to be inserted
-	page_table_entry_t pte = {page_num,frame_num,TRUE};
+int insert_page_table(page_t page_num, frame_t* frame_num, page_table_t* page_table) {
+	// Assign the page to the next available frame
+	*frame_num = page_table->next_page_table_ptr;
 
-	//insert the pte into p_t
+	// Create a new pte and insert it in the page table
+	page_table_entry_t pte = {page_num,*frame_num,TRUE};
 	page_table->page_table_entry[page_table->next_page_table_ptr] = pte;
 
-	// Increment p_t next pointer
+	// Increment p_t next pointer (Loop around to 0 if off the end)
 	page_table->next_page_table_ptr = (page_table->next_page_table_ptr+1)%NUM_PAGES;
 	return 0;
 }
@@ -57,13 +58,13 @@ int insert_page_table(page_t page_num, frame_t frame_num, page_table_t* page_tab
 */
 
 // Only called when the provided frame cannot be found
-int page_fault_handler(frame_t frame_num, physical_memory_t* physical_memory, 
+int page_fault_handler(page_t page_num, frame_t* frame_num, physical_memory_t* physical_memory, 
 						page_table_t* page_table, tlb_t* tlb) {
-	// Pull page from backing store into physical memory
-	load_frame_to_physical_memory(frame_num, *physical_memory);
-	
-	//Update the page table (give the loaded frame a page num)
-	insert_page_table(frame_num, frame_num, page_table);
+	//Update the page table (get a frame_num for the page)
+	insert_page_table(page_num, frame_num, page_table);
+
+	// Pull page from backing store into physical memory (at frame_num)
+	load_frame_to_physical_memory(page_num, *frame_num, *physical_memory);
 
 	//Update the tlb
 	return 0;

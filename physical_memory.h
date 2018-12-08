@@ -13,5 +13,5 @@ typedef byte value_t;
 int init_physical_memory(physical_memory_t physical_memory);
 int read_physical_memory(paddress_t physical_address, physical_memory_t physical_memory, 
 							value_t* value);
-int load_frame_to_physical_memory(frame_t frame_num, physical_memory_t physical_memory);
+int load_frame_to_physical_memory(page_t page_num, frame_t frame_num, physical_memory_t physical_memory);
 #endif
