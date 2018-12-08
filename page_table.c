@@ -12,12 +12,14 @@ int page_table_init(page_table_t* page_table) {
 		page_table_entry_t pte = {0, 0, FALSE}; //Initialize to invalid
 		page_table->page_table_entry[i] = pte;
 	}
+	page_table->next_page_table_ptr = 0;
 	return 0;
 }
 
 int search_page_table(page_t page_num, page_table_t page_table, 
 						bool* is_page_fault, frame_t* frame_num) {
 	*is_page_fault = TRUE;
+
 	for (int i = 0; i < NUM_PAGES; i++) {
 		page_table_entry_t pte = page_table.page_table_entry[i];
 		/* check for page_num in every page_table_entry */
@@ -29,6 +31,20 @@ int search_page_table(page_t page_num, page_table_t page_table,
 	return 0;
 }
 
+// Inserts a new pte into page_table and increments the p_t pointer
+int insert_page_table(page_t page_num, frame_t frame_num, page_table_t* page_table) {
+	// New pte to be inserted
+	page_table_entry_t pte = {page_num,frame_num,TRUE};
+
+	//insert the pte into p_t
+	page_table->page_table_entry[page_table->next_page_table_ptr] = pte;
+
+	// Increment p_t next pointer
+	page_table->next_page_table_ptr = (page_table->next_page_table_ptr+1)%NUM_PAGES;
+	return 0;
+}
+
+
 /* 
  * Handling a page fault: Load a 256-byte page from backing_store             
  * into the simulated main memory.             
@@ -39,11 +55,15 @@ int search_page_table(page_t page_num, page_table_t page_table,
  * The prototype has been changed by adding frame_number as              
  * an input parameter.              
 */
+
+// Only called when the provided frame cannot be found
 int page_fault_handler(frame_t frame_num, physical_memory_t* physical_memory, 
 						page_table_t* page_table, tlb_t* tlb) {
 	// Pull page from backing store into physical memory
 	load_frame_to_physical_memory(frame_num, *physical_memory);
-	//Update the page table
+	
+	//Update the page table (give the loaded frame a page num)
+	insert_page_table(frame_num, frame_num, page_table);
 
 	//Update the tlb
 	return 0;
