@@ -15,8 +15,8 @@ int logic_address_loader(char* logic_address_file_name, logic_address_list_t log
                             int* logic_address_list_size);
 int get_a_logic_address(logic_address_list_t logic_address_list, int index, laddress_t* logic_address); //NOPE
 int update_address_value_list(laddress_t logic_address, paddress_t physical_address,
-                                value_t value, address_value_list_t* address_value_list); //NOPE
-int output_address_value_list(char* output_file, address_value_list_t address_value_list); //NOPE
+                                value_t value, int index, address_value_list_t address_value_list); //NOPE
+int output_address_value_list(char* output_file_name, address_value_list_t address_value_list, int list_size); //NOPE
 
 int main () { 
     /* Variables: page number, frame number and offset */
@@ -114,11 +114,11 @@ int main () {
         printf("value: %d\n", value);
         /* Update the address-value list */ 
         update_address_value_list(logic_address, physical_address, value,                             
-                                    &address_value_list);
+                                    i, address_value_list);
     } 
     /* end of for logic_address_list */
     /* Output the address-value list into an output file */
-    output_address_value_list(output_file, address_value_list);
+    output_address_value_list(output_file, address_value_list, logic_address_list_size);
 } /* end of main() */
 
 
@@ -162,10 +162,30 @@ int get_a_logic_address(logic_address_list_t logic_address_list, int index, ladd
     *logic_address = logic_address_list[index];
     return 0;
 }
+//CURRENTLY ONLY STORING VALUE
 int update_address_value_list(laddress_t logic_address, paddress_t physical_address,
-                                value_t value, address_value_list_t* address_value_list) {
+                                value_t value, int index, address_value_list_t address_value_list) {
+    address_value_list[index] = value;
     return 0;
 }
-int output_address_value_list(char* output_file, address_value_list_t address_value_list) {
+int output_address_value_list(char* output_file_name, address_value_list_t address_value_list, 
+                                int list_size) {
+    FILE *file;
+
+    file = fopen(output_file_name, "w" );
+    
+    /* fopen returns 0, the NULL pointer, on failure */
+    if ( file == 0 ) {
+         printf( "Could not open file: %s.\n", output_file_name);
+         return 1;
+    }
+    /* print integers and floats */
+    for (int i = 0; i < list_size; i++) {
+        value_t value = address_value_list[i];
+        fprintf(file, "%d\n", value);
+    }
+
+    fclose( file );
+
     return 0;
 }
