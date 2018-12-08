@@ -10,14 +10,30 @@
 // This is how many logic addresses are requested
 typedef laddress_t logic_address_list_t[PAGE_SIZE*NUM_PAGES]; //SIZE INCORRECT (needs to be dynamic)
 typedef value_t address_value_list_t[PAGE_SIZE*NUM_PAGES]; //SIZE INCORRECT (see above)
+static const char output_file_name[] = "vm_sim_output.txt";
+
 int logic_address_loader(char* logic_address_file_name, logic_address_list_t logic_address_list, 
                             int* logic_address_list_size);
 int get_a_logic_address(logic_address_list_t logic_address_list, int index, laddress_t* logic_address); //NOPE
 int update_address_value_list(laddress_t logic_address, paddress_t physical_address,
                                 value_t value, int index, address_value_list_t address_value_list); //NOPE
 int output_address_value_list(char* output_file_name, address_value_list_t address_value_list, int list_size); //NOPE
+void welcome_message(void);
 
-int main () { 
+int main ( int argc, char *argv[] ) { 
+    /* argc should be 2 for correct execution */
+    if (argc != 2) {
+        /* We print argv[0] assuming it is the program name */
+        printf( "usage: %s, <input logic address file>\n", argv[0]);
+        return 1;
+    }
+
+    welcome_message();
+    /* three counters initialized to be 0 */
+    u_int_t lookups = 0;
+    u_int_t tlb_hits = 0;
+    u_int_t page_faults = 0;   
+
     /* Variables: page number, frame number and offset */
     page_t page_num;
     frame_t frame_num;
@@ -43,9 +59,9 @@ int main () {
     bool is_page_fault;
 
     /* Input and output file names */
-    //const char input_file[] = "testinput.txt";
-    const char input_file[] = "InputFile.txt";
-    const char output_file[] = "output.txt";
+    char* input_file = argv[1];
+    //const char input_file[] = "InputFile.txt";
+    
 
     /* Initialize the system */
     tlb_init(&sys_tlb);
@@ -59,10 +75,10 @@ int main () {
     /* Create a logical address list from the file */ 
     logic_address_loader(input_file, logic_address_list, &logic_address_list_size); //INCLUDE SIZE
 
-    for (int i = 0; i < logic_address_list_size; i++) {    
+    for (int i = 0; i < logic_address_list_size; i++) { 
+        lookups += 1;   
         /* Get a logic address, its page number and offset */    
         get_a_logic_address(logic_address_list, i, &logic_address);   
-        printf("logic address: %s (%d)\n", itob16(logic_address), logic_address); 
         /*      
          * The code below demonstrates how to use a pointer to access      
          * page_number updated by the get_page_number() function      
@@ -75,8 +91,8 @@ int main () {
         search_tlb(page_num, sys_tlb, &is_tlb_hit, &frame_num);  
 
         /* Hit the TLB: the address translation is done. */    
-        if (is_tlb_hit == TRUE) {  
-            printf("-----TLB HIT-----\n");
+        if (is_tlb_hit == TRUE) {
+            tlb_hits += 1;
             create_physical_address(frame_num, offset, &physical_address);    
         }    
 
@@ -92,7 +108,8 @@ int main () {
                 tlb_replacement_LRU(page_num, frame_num, &sys_tlb);     //CHANGE TO LRU   
             }        
             /* page fault occurs: call fault_fault_handler */        
-            else {             
+            else {
+                page_faults += 1;    
                 page_fault_handler(page_num, &frame_num, &physical_memory,                                
                                     &page_table, &sys_tlb);            
                 create_physical_address(frame_num, offset, &physical_address);        
@@ -103,16 +120,21 @@ int main () {
         tlb_update(page_num, &sys_tlb);  
         /* Read one-byte value from the physical memory */    
         read_physical_memory(physical_address, physical_memory, &value);    \
-        printf("frame: %d\n", frame_num);
-        printf("value: %d\n", value);
-        tlb_display(sys_tlb);
         /* Update the address-value list */ 
         update_address_value_list(logic_address, physical_address, value,                             
                                     i, address_value_list);
     } 
     /* end of for logic_address_list */
+
+    /* Print results to std out */
+
+    printf("Lookups: %d\n", lookups);
+    printf("Page fault rate: %f\n", 1.0*page_faults/lookups);
+    printf("TLB hit rate: %f\n", 1.0*tlb_hits/lookups);
+    printf("Check the results in the outputfile: %s\n", output_file_name);
+    
     /* Output the address-value list into an output file */
-    output_address_value_list(output_file, address_value_list, logic_address_list_size);
+    output_address_value_list(output_file_name, address_value_list, logic_address_list_size);
 } /* end of main() */
 
 
@@ -183,4 +205,12 @@ int output_address_value_list(char* output_file_name, address_value_list_t addre
     fclose( file );
 
     return 0;
+}
+
+void welcome_message(void) {
+    printf("Welcome to Turner Atwood's VM Simulator\n");
+    printf("Number of logical pages: %d\n", NUM_PAGES);
+    printf("Number of physical frames: %d\n", NUM_FRAMES);
+    printf("Page size: %d\n", PAGE_SIZE);
+    printf("TLB size: %d\n", TLB_SIZE);
 }

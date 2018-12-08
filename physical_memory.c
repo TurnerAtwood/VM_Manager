@@ -4,7 +4,6 @@
 #include "address.h"
 #include "page_table.h"
 #include "physical_memory.h"
-#define DEBUG
 
 int init_physical_memory(physical_memory_t physical_memory) {
 	for (int i = 0;  i < PAGE_SIZE*NUM_PAGES; i++) {
@@ -13,7 +12,6 @@ int init_physical_memory(physical_memory_t physical_memory) {
 	return 0;
 }
 
-// NEEDS TESTING
 int read_physical_memory(paddress_t physical_address, physical_memory_t physical_memory, 
 							value_t* value) {
 	
@@ -35,9 +33,6 @@ int load_frame_to_physical_memory(page_t page_num, frame_t frame_num,
     byte one_byte; 
     
     // Start your read at the beginning of the relevant frame
-
-    printf("Reading page %d from b_s to frame %d\n", page_num, frame_num);
-
     seek_position = page_num << OFFSET_BITS;
     place_position = frame_num << OFFSET_BITS;
     num_bytes_read = PAGE_SIZE;

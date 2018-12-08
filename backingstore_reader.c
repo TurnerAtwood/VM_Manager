@@ -17,7 +17,7 @@ void welcome_message(void);
 
 int main ( int argc, char *argv[] ) {
   
-    /* three counters initialized to be 0*/
+    /* three counters initialized to be 0 */
     uint_t lookups = 0;
     uint_t tlb_hits = 0;
     uint_t page_faults = 0;    
