@@ -9,15 +9,20 @@
 
 // This is how many logic addresses are requested
 typedef laddress_t logic_address_list_t[PAGE_SIZE*NUM_PAGES]; //SIZE INCORRECT (needs to be dynamic)
-typedef value_t address_value_list_t[PAGE_SIZE*NUM_PAGES]; //SIZE INCORRECT (see above)
+typedef struct {
+    laddress_t logical[PAGE_SIZE*NUM_PAGES];
+    paddress_t physical[PAGE_SIZE*NUM_PAGES];
+    value_t value[PAGE_SIZE*NUM_PAGES];
+}address_value_list_t;
 static const char output_file_name[] = "vm_sim_output.txt";
 
 int logic_address_loader(char* logic_address_file_name, logic_address_list_t logic_address_list, 
                             int* logic_address_list_size);
 int get_a_logic_address(logic_address_list_t logic_address_list, int index, laddress_t* logic_address); //NOPE
 int update_address_value_list(laddress_t logic_address, paddress_t physical_address,
-                                value_t value, int index, address_value_list_t address_value_list); //NOPE
-int output_address_value_list(char* output_file_name, address_value_list_t address_value_list, int list_size); //NOPE
+                                value_t value, int index, address_value_list_t* address_value_list); //NOPE
+int output_address_value_list(char* output_file_name, address_value_list_t address_value_list, int list_size, 
+                                u_int_t lookups, u_int_t tlb_hits, u_int_t page_faults); //NOPE
 void welcome_message(void);
 
 int main ( int argc, char *argv[] ) { 
@@ -29,6 +34,10 @@ int main ( int argc, char *argv[] ) {
     }
 
     welcome_message();
+    printf("Choose TLB replacement strategy [1: FIFO, 2: LRU] ");
+    int strategy;
+    scanf("%d", &strategy);
+
     /* three counters initialized to be 0 */
     u_int_t lookups = 0;
     u_int_t tlb_hits = 0;
@@ -61,14 +70,13 @@ int main ( int argc, char *argv[] ) {
     /* Input and output file names */
     char* input_file = argv[1];
     //const char input_file[] = "InputFile.txt";
-    
 
     /* Initialize the system */
     tlb_init(&sys_tlb);
     page_table_init(&page_table);
     init_physical_memory(physical_memory);
 
-    /* Lists for I/O */
+    /* List for logic address input */
     logic_address_list_t logic_address_list;
     int logic_address_list_size;
 
@@ -105,13 +113,18 @@ int main ( int argc, char *argv[] ) {
                 create_physical_address(frame_num, offset, &physical_address);
 
                 /* Replace the oldest entry in the TLB with this new entry */            
-                tlb_replacement_LRU(page_num, frame_num, &sys_tlb);     //CHANGE TO LRU   
+                if (strategy == 1) {
+                    tlb_replacement_FIFO(page_num, frame_num, &sys_tlb);
+                }
+                else {
+                    tlb_replacement_LRU(page_num, frame_num, &sys_tlb);
+                }
             }        
             /* page fault occurs: call fault_fault_handler */        
             else {
                 page_faults += 1;    
                 page_fault_handler(page_num, &frame_num, &physical_memory,                                
-                                    &page_table, &sys_tlb);            
+                                    &page_table, &sys_tlb, strategy);            
                 create_physical_address(frame_num, offset, &physical_address);        
             }    
         } 
@@ -122,19 +135,22 @@ int main ( int argc, char *argv[] ) {
         read_physical_memory(physical_address, physical_memory, &value);    \
         /* Update the address-value list */ 
         update_address_value_list(logic_address, physical_address, value,                             
-                                    i, address_value_list);
+                                    i, &address_value_list);
+        /* Print the result to stdout */
+        printf("Virtual address: %d; Physical Address: %d; Value: %d\n",logic_address,physical_address,value);
     } 
     /* end of for logic_address_list */
 
     /* Print results to std out */
 
-    printf("Lookups: %d\n", lookups);
-    printf("Page fault rate: %f\n", 1.0*page_faults/lookups);
-    printf("TLB hit rate: %f\n", 1.0*tlb_hits/lookups);
+    printf("\nLookups: %d\n", lookups);
+    printf("Page fault rate: %3.1f%%\n", 100.0*page_faults/lookups);
+    printf("TLB hit rate: %3.1f%%\n", 100.0*tlb_hits/lookups);
     printf("Check the results in the outputfile: %s\n", output_file_name);
     
     /* Output the address-value list into an output file */
-    output_address_value_list(output_file_name, address_value_list, logic_address_list_size);
+    output_address_value_list(output_file_name, address_value_list, logic_address_list_size, 
+                                lookups, tlb_hits, page_faults);
 } /* end of main() */
 
 
@@ -180,13 +196,15 @@ int get_a_logic_address(logic_address_list_t logic_address_list, int index, ladd
 }
 //CURRENTLY ONLY STORING VALUE
 int update_address_value_list(laddress_t logic_address, paddress_t physical_address,
-                                value_t value, int index, address_value_list_t address_value_list) {
-    address_value_list[index] = value;
+                                value_t value, int index, address_value_list_t* address_value_list) {
+    address_value_list->value[index] = value;
+    address_value_list->logical[index] = logic_address;
+    address_value_list->physical[index] = physical_address;
     return 0;
 }
 
 int output_address_value_list(char* output_file_name, address_value_list_t address_value_list, 
-                                int list_size) {
+                                int list_size, u_int_t lookups, u_int_t tlb_hits, u_int_t page_faults) {
     FILE *file;
 
     file = fopen(output_file_name, "w" );
@@ -196,11 +214,19 @@ int output_address_value_list(char* output_file_name, address_value_list_t addre
          printf( "Could not open file: %s.\n", output_file_name);
          return 1;
     }
-    /* print integers and floats */
+    /* print the info on each lookup */
     for (int i = 0; i < list_size; i++) {
-        value_t value = address_value_list[i];
-        fprintf(file, "%d\n", value);
+        value_t value = address_value_list.value[i];
+        laddress_t logical = address_value_list.logical[i];
+        paddress_t physical = address_value_list.physical[i];
+        fprintf(file, "Virtual address: %d; Physical Address: %d; Value: %d\n",logical,physical,value);
     }
+
+    /* Print performance info */
+    fprintf(file, "\n");
+    fprintf(file, "Lookups: %d\n", lookups);
+    fprintf(file, "Page fault rate: %3.1f%%\n", 100.0*page_faults/lookups);
+    fprintf(file, "TLB hit rate: %3.1f%%\n", 100.0*tlb_hits/lookups);
 
     fclose( file );
 
@@ -212,5 +238,7 @@ void welcome_message(void) {
     printf("Number of logical pages: %d\n", NUM_PAGES);
     printf("Number of physical frames: %d\n", NUM_FRAMES);
     printf("Page size: %d\n", PAGE_SIZE);
+    printf("Number of physical frames: %d\n", NUM_PAGES*PAGE_SIZE);
     printf("TLB size: %d\n", TLB_SIZE);
+    printf("\n");
 }

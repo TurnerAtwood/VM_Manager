@@ -58,7 +58,7 @@ int insert_page_table(page_t page_num, frame_t* frame_num, page_table_t* page_ta
 
 // Only called when the provided frame cannot be found
 int page_fault_handler(page_t page_num, frame_t* frame_num, physical_memory_t* physical_memory, 
-						page_table_t* page_table, tlb_t* tlb) {
+						page_table_t* page_table, tlb_t* tlb, int strategy) {
 	//Update the page table (get a frame_num for the page)
 	insert_page_table(page_num, frame_num, page_table);
 
@@ -66,6 +66,11 @@ int page_fault_handler(page_t page_num, frame_t* frame_num, physical_memory_t* p
 	load_frame_to_physical_memory(page_num, *frame_num, *physical_memory);
 
 	//Update the tlb
-	tlb_replacement_LRU(page_num, *frame_num, tlb);
+	if (strategy == 1) {
+    	tlb_replacement_FIFO(page_num, *frame_num, tlb);
+    }
+    else {
+        tlb_replacement_LRU(page_num, *frame_num, tlb);
+    }
 	return 0;
 }

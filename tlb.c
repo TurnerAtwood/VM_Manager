@@ -8,22 +8,7 @@
 #include "address.h"
 #include "tlb.h"
 //#define DEBUG
-/*
-int main ( int argc, char *argv[] ) {
-    tlb_t my_tlb; 
-    page_t     page_num;
-    frame_t    frame_num;
 
-    page_num = 10;
-    frame_num = 3;
-
-    tlb_init(&my_tlb);
-    tlb_display(my_tlb);
-    //tlb_replacement_FIFO(page_num, frame_num, &my_tlb);
-    
-    return 0;
-}
-*/
 int tlb_init(tlb_t *tlb) {
     u_int_t i;
  
@@ -70,6 +55,9 @@ int tlb_update(page_t page_num, tlb_t* tlb) {
     u_int_t i;
     // Increment the age of every tlb entry
     for (i = 0; i < TLB_SIZE; i++) { 
+        if (tlb->tlb_entry[i].page_num == page_num) {
+            tlb->tlb_entry[i].age = 0;    
+        } 
         tlb->tlb_entry[i].age++;
     }
     return 0;
@@ -91,6 +79,14 @@ int tlb_replacement_LRU(page_t page_num, frame_t frame_num, tlb_t* tlb) {
 
     tlb_entry_t new_tlbe = {page_num, frame_num, TRUE, 0};
     tlb->tlb_entry[oldest_index] = new_tlbe;
+
+    return 0;
+}
+
+int tlb_replacement_FIFO(page_t page_num, frame_t frame_num, tlb_t* tlb) {
+    tlb_entry_t new_tlbe = {page_num, frame_num, TRUE, 0};
+    tlb->tlb_entry[tlb->next_tlb_ptr] = new_tlbe;
+    tlb->next_tlb_ptr = (tlb->next_tlb_ptr+1)%TLB_SIZE;
 
     return 0;
 }
