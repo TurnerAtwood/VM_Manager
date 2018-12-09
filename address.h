@@ -1,7 +1,7 @@
 /*
- * Project 5: address.h
+ * Project 6: address.h
  * This is a header file of address.c
- * Xiao Qin.
+ * Turner Atwood with parts from Xiao Qin.
  */
 #ifndef ADDRESS_H
 #define ADDRESS_H
@@ -30,6 +30,8 @@ typedef unsigned int paddress_t;
 char *itob(int x);
 char *itob16(int x);
 char *itob8(int x);
+
+/* Methods to go between addresses, offsets, and  page/frame numbers */
 int get_offset(laddress_t logic_address, offset_t* offset);
 int get_page_number(laddress_t logic_address, page_t* page_num);
 int create_physical_address(frame_t frame_num, offset_t offset, paddress_t* physical_address);

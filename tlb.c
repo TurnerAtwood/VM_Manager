@@ -1,13 +1,12 @@
 /*
- * Project 5: tlb.c
- * Xiao Qin.
+ * Project 6: tlb.c
+ * Turner Atwood with parts from Xiao Qin.
  */
 #include <stdio.h>
 #include <limits.h>
 #include "system.h"
 #include "address.h"
 #include "tlb.h"
-//#define DEBUG
 
 int tlb_init(tlb_t *tlb) {
     u_int_t i;
@@ -33,7 +32,7 @@ int tlb_display(tlb_t tlb) {
 
     return 0;
 }
-
+/* Search for a page num in the tlb */
 int search_tlb(page_t page_num, tlb_t tlb, bool* is_tlb_hit, frame_t* frame_num) {
     u_int_t i;
     *is_tlb_hit = FALSE;
@@ -50,7 +49,8 @@ int search_tlb(page_t page_num, tlb_t tlb, bool* is_tlb_hit, frame_t* frame_num)
     return 0;
 }
 
-// Called after replacement occurs
+/* Increases the age of every element in the tlb */
+/* Called after replacement occurs */
 int tlb_update(page_t page_num, tlb_t* tlb) {
     u_int_t i;
     // Increment the age of every tlb entry
@@ -63,6 +63,7 @@ int tlb_update(page_t page_num, tlb_t* tlb) {
     return 0;
 }
 
+/* Replace the least recently used entry */
 int tlb_replacement_LRU(page_t page_num, frame_t frame_num, tlb_t* tlb) {
     u_int_t i;
     int oldest_age = 0;
@@ -83,6 +84,7 @@ int tlb_replacement_LRU(page_t page_num, frame_t frame_num, tlb_t* tlb) {
     return 0;
 }
 
+/* Replace the oldest tlb entry */
 int tlb_replacement_FIFO(page_t page_num, frame_t frame_num, tlb_t* tlb) {
     tlb_entry_t new_tlbe = {page_num, frame_num, TRUE, 0};
     tlb->tlb_entry[tlb->next_tlb_ptr] = new_tlbe;

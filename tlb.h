@@ -1,7 +1,7 @@
 /*
- * COMP3500: Project 5
- * Sample header file for TLB 
- * Xiao Qin
+ * Project 6: tlb.h
+ * This is a header file of tlb.c
+ * Turner Atwood with parts from Xiao Qin.
  */
 #ifndef TLB_H
 #define TLB_H

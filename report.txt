@@ -1,0 +1,26 @@
+11.1
+(1) A frame number is assigned to each page as it is read into physical memory from the backing store. After the frame is read in it is stored in the page table. The translation of the logical address to the physical address is  guaranteed to be correct because of the maintained integrity of the page table.
+
+(2) The page table, physical memory, and TLB are all arrays. Each page table entry has a page number, frame number, and a boolean to store the entry's validity. Physical memory is a straightforward array of bytes. Each TLB entry has a page nuber, frame number, a validity boolean, and an age.
+
+(3) Yes, this system takes in logical addresses and returns the corresponding physical address and the value in memory at that location. It simulates a TLB, page table, and the physical memory and backing store that they would operate on.
+
+(4) Yes, the >> and << operators were used to manipulate the page and frame numbers in each address, as well as the & operator to extract the offset each address and the | operator to insert the offset into an address.
+
+(5) In FIFO, the oldest entry currently in the TLB is always replaced, while in LRU, the entry that was used least recently is replaced.
+
+11.2
+(1) this solution is realitvely general. All of the sizes of the data structures can be maniuplated inside of system.h and different replacement methods of the TLB can  be implemented by adding another conditional to the existing if-else statement.
+
+(2) Changes to most data structure sizes can be edited in one line in system.h.
+
+(3) Yes, pages are only loaded into physical memory when a page fault occurs.
+
+(4) Yes, frames can be loaded in from any source and not all of the pages that are "stored" in the virtual address space are stored in physical memory at any given time. Thus, the backingstrore could be larger than the physical address space and the virtual memory manager would have no problem.
+
+11.3
+(1) BITCH NAH
+
+(2) A few minor changes were made to the original prototype gone over in class to make the sultion look a little cleaner, but overall no major changes were made to the structure of the code. THe control flow logic is slightly odd, but since the situation is simply to simulate a virtual addressing space, it works just fine.
+
+(3) The only outside sources used were the piecesof code provided specifically fr this project.

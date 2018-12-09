@@ -1,53 +1,10 @@
 /*
- * Project 5: address.c
- *
- * This program demonstrates:
- * (1) how to derive page number and offset from a logical address
- * (2) how to create a physical address using frame number and offset
- * 
- * Compile: gcc address.c -o address
- * Run: ./address
- * Xiao Qin.
+ * Project 6: address.c
+ * Turner Atwood with parts from Xiao Qin.
  */
 #include <stdio.h>
 #include <limits.h>
 #include "address.h"
-//#define DEBUG
-/*
-int main ( int argc, char *argv[] ) {
-    laddress_t logical_address;
-    page_t     page_num;
-    offset_t   offset;
-    frame_t    frame_num;
-    paddress_t physical_address;   
-
-    logical_address = 16916;
-
-    page_num = logical_address >> OFFSET_BITS;
-    offset = logical_address & OFFSET_MASK;  
-    get_offset(logical_address, &offset); 
-
-    printf("logical address: %d, page number: %d, offset: %d\n", logical_address, page_num, offset);
-  
-#ifdef DEBUG 
-    printf("logical address: %s\n", itob(logical_address));
-#endif 
-    printf("logical address: %s\n", itob16(logical_address));
- 
-    printf("page number: %s\n", itob8(page_num));
-    
-    printf("offset: %s\n", itob8(offset));
-
-    printf("Unit Testing: Now create physical address ...\n");
-
-    frame_num = page_num;
-    physical_address = frame_num << OFFSET_BITS | offset;
-
-    printf("frame number:%d, offset: %d, physical address: %d\n", frame_num, offset, physical_address);
-
-    return 0;
-}
-*/
 
 /*
  * convert machine number to human-readable binary string.
@@ -116,16 +73,25 @@ char *itob8(int x)
     return buff;
 }
 
-
+/*
+ *  Returns the offset of the given address
+ */
 int get_offset(laddress_t logic_address, offset_t* offset) {
     *offset = logic_address & OFFSET_MASK;
     return 0;
 }
 
+/*
+ *  Returns the page number of a logical address
+ */
 int get_page_number(laddress_t logic_address, page_t* page_num) {
     *page_num = logic_address >> OFFSET_BITS;
     return 0;
 }
+
+/*
+ *  Return a physical address from a frame number and an offset
+ */
 
 int create_physical_address(frame_t frame_num, offset_t offset, paddress_t* physical_address) {
     *physical_address = frame_num << OFFSET_BITS | offset;

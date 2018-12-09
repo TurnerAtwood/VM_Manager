@@ -1,3 +1,8 @@
+/*
+ * Project 6: page_table.h
+ * This is a header file of page_table.c
+ * Turner Atwood
+ */
 #ifndef PAGE_TABLE_H
 #define PAGE_TABLE_H
 

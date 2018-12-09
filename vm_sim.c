@@ -1,4 +1,8 @@
-
+/*
+ * Project 6: tlb.h
+ * This is the driver for the virtual memory.
+ * Turner Atwood with parts from Xiao Qin.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include "system.h"
@@ -7,13 +11,15 @@
 #include "page_table.h"
 #include "physical_memory.h"
 
-// This is how many logic addresses are requested
+/* This is how many logic addresses are requested */
 typedef laddress_t logic_address_list_t[PAGE_SIZE*NUM_PAGES]; //SIZE INCORRECT (needs to be dynamic)
+/* Store the results */
 typedef struct {
     laddress_t logical[PAGE_SIZE*NUM_PAGES];
     paddress_t physical[PAGE_SIZE*NUM_PAGES];
     value_t value[PAGE_SIZE*NUM_PAGES];
 }address_value_list_t;
+
 static const char output_file_name[] = "vm_sim_output.txt";
 
 int logic_address_loader(char* logic_address_file_name, logic_address_list_t logic_address_list, 
@@ -141,7 +147,7 @@ int main ( int argc, char *argv[] ) {
     } 
     /* end of for logic_address_list */
 
-    /* Print results to std out */
+    /* Print statistics to std out */
 
     printf("\nLookups: %d\n", lookups);
     printf("Page fault rate: %3.1f%%\n", 100.0*page_faults/lookups);
@@ -155,6 +161,8 @@ int main ( int argc, char *argv[] ) {
 
 
 // THESE ARE FUNCTIONS DEALING WITH INPUT/OUTPUT
+
+/* Load list of logical addresses from the input file */
 int logic_address_loader(char* logic_address_file_name, logic_address_list_t logic_address_list, 
                             int* logic_address_list_size) {
     FILE *file;
@@ -190,11 +198,13 @@ int logic_address_loader(char* logic_address_file_name, logic_address_list_t log
     return 0;
 }
 
+/* Get the next logical address */
 int get_a_logic_address(logic_address_list_t logic_address_list, int index, laddress_t* logic_address) {
     *logic_address = logic_address_list[index];
     return 0;
 }
-//CURRENTLY ONLY STORING VALUE
+
+/* Add a result to the result list */
 int update_address_value_list(laddress_t logic_address, paddress_t physical_address,
                                 value_t value, int index, address_value_list_t* address_value_list) {
     address_value_list->value[index] = value;
@@ -203,6 +213,7 @@ int update_address_value_list(laddress_t logic_address, paddress_t physical_addr
     return 0;
 }
 
+/* Output the results to the output file */
 int output_address_value_list(char* output_file_name, address_value_list_t address_value_list, 
                                 int list_size, u_int_t lookups, u_int_t tlb_hits, u_int_t page_faults) {
     FILE *file;
@@ -233,6 +244,7 @@ int output_address_value_list(char* output_file_name, address_value_list_t addre
     return 0;
 }
 
+/* Message at the beginning of the program */
 void welcome_message(void) {
     printf("Welcome to Turner Atwood's VM Simulator\n");
     printf("Number of logical pages: %d\n", NUM_PAGES);

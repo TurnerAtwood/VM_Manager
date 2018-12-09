@@ -1,3 +1,8 @@
+/*
+ * Project 6: page_table.c
+ * Turner Atwood
+ */
+
 #include <stdio.h>
 #include <limits.h>
 #include "system.h"
@@ -15,6 +20,7 @@ int page_table_init(page_table_t* page_table) {
 	return 0;
 }
 
+/* Search for a page num in the page table */
 int search_page_table(page_t page_num, page_table_t page_table, 
 						bool* is_page_fault, frame_t* frame_num) {
 	*is_page_fault = TRUE;
@@ -30,7 +36,7 @@ int search_page_table(page_t page_num, page_table_t page_table,
 	return 0;
 }
 
-// Inserts a new pte into page_table and increments the p_t pointer
+/* Inserts a new pte into page_table and increments the p_t pointer */
 int insert_page_table(page_t page_num, frame_t* frame_num, page_table_t* page_table) {
 	// Assign the page to the next available frame
 	*frame_num = page_table->next_page_table_ptr;
@@ -45,18 +51,8 @@ int insert_page_table(page_t page_num, frame_t* frame_num, page_table_t* page_ta
 }
 
 
-/* 
- * Handling a page fault: Load a 256-byte page from backing_store             
- * into the simulated main memory.             
- * Attention: You need to call the page_table_update() and              
- * TLB_replacement_LRU() functions to implement the following              
- * page_fault_handler() function, where both page_table and              
- * sys_tlb must be updated.              
- * The prototype has been changed by adding frame_number as              
- * an input parameter.              
-*/
-
-// Only called when the provided frame cannot be found
+/* Handles a page fault: Loads a page to memory, inserts it in the page table and  TLB */
+/* Only called when the provided frame cannot be found */
 int page_fault_handler(page_t page_num, frame_t* frame_num, physical_memory_t* physical_memory, 
 						page_table_t* page_table, tlb_t* tlb, int strategy) {
 	//Update the page table (get a frame_num for the page)
